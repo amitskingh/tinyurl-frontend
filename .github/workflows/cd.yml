@@ -10,23 +10,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy to EC2 via SSH
-        uses: appleboy/ssh-action@v1.0.3
+      # Setup Node
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # Build frontend
+      - name: Build frontend
+        run: npm run build
+
+      # Upload dist files to EC2
+      - name: Copy dist to EC2
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd /home/ubuntu/tinyurl-frontend
-
-            git fetch origin
-            git checkout prod
-            git reset --hard origin/prod
-
-            npm ci
-            npm run build
-
-            sudo cp -r dist/. /var/www/tinyurl-frontend/
+          source: "dist/*"
+          target: "/var/www/tinyurl-frontend"
