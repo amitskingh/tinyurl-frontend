@@ -30,5 +30,3 @@ jobs:
             npm run build
 
             sudo cp -r dist/. /var/www/tinyurl-frontend/
-
-            sudo systemctl reload nginx
