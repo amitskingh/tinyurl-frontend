@@ -37,3 +37,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "dist/*"
           target: "/var/www/tinyurl-frontend"
+          # Upload files directly without creating dist folder
+          # This becomes "/var/www/tinyurl-frontend/index.html" instead of "/var/www/tinyurl-frontend/dist/index.html"
+          strip_components: 1
