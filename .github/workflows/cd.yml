@@ -43,8 +43,8 @@ jobs:
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            rm -rf /var/www/tinyurl-frontend-new
-            mkdir -p /var/www/tinyurl-frontend-new
+            sudo rm -rf /var/www/tinyurl-frontend-new
+            sudo mkdir -p /var/www/tinyurl-frontend-new
 
       # Upload newly built frontend files
       # Existing live frontend stays untouched during upload
