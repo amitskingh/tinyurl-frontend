@@ -225,7 +225,7 @@ function Shortener() {
     if (!shortCode) return null;
     const origin = import.meta.env.VITE_PUBLIC_ORIGIN ?? window.location.origin;
     const base = apiPrefix.startsWith("http") ? apiPrefix : `${origin}${apiPrefix}`;
-    return `${base}/api/v1/${encodeURIComponent(shortCode)}`;
+    return `${base}/${encodeURIComponent(shortCode)}`;
   }, [createdAlias]);
 
   const submit = useCallback(async () => {
