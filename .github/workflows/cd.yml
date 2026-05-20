@@ -1,88 +1,37 @@
 name: Deploy Frontend to EC2
-
 on:
   push:
     branches:
       - prod
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      # Checkout latest repository code
+      # Checkout repository (triggers the workflow)
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Setup Node.js runtime
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      # Install frontend dependencies using package-lock.json
-      - name: Install dependencies
-        run: npm ci
-
-      # Build production frontend bundle
-      # Vite injects env vars at build time
-      # Secrets are NOT automatically exposed to build process
-      - name: Build frontend
-        run: npm run build
-        env:
-          VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
-          VITE_API_PREFIX: ${{ secrets.VITE_API_PREFIX }}
-          VITE_PUBLIC_ORIGIN: ${{ secrets.VITE_PUBLIC_ORIGIN }}
-
-      # Create fresh temporary upload directory on EC2
-      # Prevents stale files from previous failed deployments
-      - name: Prepare upload directory
+      # SSH into EC2, build on server and deploy directly
+      - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            sudo rm -rf /var/www/tinyurl-frontend-new
-            sudo mkdir -p /var/www/tinyurl-frontend-new
+            cd /home/ubuntu/tinyurl-frontend
 
-            # Allow SCP upload user to write files
-            sudo chown -R ubuntu:ubuntu /var/www/tinyurl-frontend-new
+            # Pull latest code from prod branch
+            git fetch origin
+            git checkout prod
+            git reset --hard origin/prod
 
-      # Upload freshly built frontend bundle
-      # Live frontend stays untouched during upload
-      - name: Upload dist to EC2
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "dist/"
-          target: "/var/www/tinyurl-frontend-new"
+            # Install dependencies and build on EC2
+            # Vite reads .env.production automatically during build
+            npm ci
+            npm run build
 
-      # Atomically swap frontend folders
-      # nginx instantly serves new version without restart
-      - name: Swap frontend folders
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            # Ensure upload actually succeeded
-            test -f /var/www/tinyurl-frontend-new/dist/index.html
-
-            # Remove stale old backup
-            sudo rm -rf /var/www/tinyurl-frontend-old
-
-            # Move current live frontend to backup
-            sudo mv /var/www/tinyurl-frontend /var/www/tinyurl-frontend-old
-
-            # Promote uploaded frontend to live version
-            sudo mv /var/www/tinyurl-frontend-new/dist /var/www/tinyurl-frontend
-
-            # Cleanup old frontend after successful swap
-            sudo rm -rf /var/www/tinyurl-frontend-old
-
-            # Restore proper nginx-readable permissions
-            sudo chmod -R 755 /var/www/tinyurl-frontend
+            # Replace live frontend with new build
+            # Keeps same directory inode — nginx volume mount stays valid
+            sudo rm -rf /var/www/tinyurl-frontend/*
+            sudo cp -r dist/* /var/www/tinyurl-frontend/
