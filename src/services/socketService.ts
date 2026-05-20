@@ -1,4 +1,5 @@
 import { io, type Socket } from "socket.io-client";
+import { backendOrigin } from "../lib/config";
 import type { ClickUpdatePayload } from "../types/analytics";
 
 interface ServerToClientEvents {
@@ -28,8 +29,6 @@ export interface SocketConnectionStatus {
 type AnalyticsSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 type ClickUpdateHandler = (payload: ClickUpdatePayload) => void;
 type StatusHandler = (status: SocketConnectionStatus) => void;
-
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL ?? "http://localhost:8080";
 
 let socket: AnalyticsSocket | null = null;
 let activeToken: string | null = null;
@@ -117,7 +116,7 @@ function bindSocketEvents(activeSocket: AnalyticsSocket) {
 }
 
 function createSocket(token: string): AnalyticsSocket {
-  const nextSocket: AnalyticsSocket = io(SOCKET_URL, {
+  const nextSocket: AnalyticsSocket = io(backendOrigin, {
     auth: {
       token,
     },

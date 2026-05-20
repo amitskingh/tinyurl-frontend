@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useRealtimeAnalytics } from "../hooks/useRealtimeAnalytics";
 import { api } from "../lib/api";
+import { backendOrigin } from "../lib/config";
 import {
   isAnalyticsError,
   type AliasRow,
@@ -258,11 +259,6 @@ export function MyLinksPanel() {
     return null;
   }
 
-  const origin =
-    (typeof import.meta.env.VITE_PUBLIC_ORIGIN === "string" &&
-      import.meta.env.VITE_PUBLIC_ORIGIN);
-  const shortUrlBase = origin;
-
   return (
     <section className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm transition-colors duration-150 hover:border-gray-300">
       <div className="flex flex-col gap-6">
@@ -303,7 +299,7 @@ export function MyLinksPanel() {
         {aliases && aliases.length > 0 ? (
           <ul className="flex flex-col gap-4">
             {aliases.map((row) => {
-              const shortUrl = `${shortUrlBase}/s/${encodeURIComponent(row.alias ?? "")}`;
+              const shortUrl = `${backendOrigin}/s/${encodeURIComponent(row.alias ?? "")}`;
               const analytics = analyticsById[row.aliasId];
 
               return (

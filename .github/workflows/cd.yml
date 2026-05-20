@@ -28,8 +28,6 @@ jobs:
         run: npm run build
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
-          VITE_API_PREFIX: ${{ secrets.VITE_API_PREFIX }}
-          VITE_PUBLIC_ORIGIN: ${{ secrets.VITE_PUBLIC_ORIGIN }}
 
       # Upload dist files to EC2
       - name: Copy dist to EC2

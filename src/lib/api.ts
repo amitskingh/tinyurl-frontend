@@ -1,8 +1,7 @@
 import axios from "axios";
+import { apiBaseURL } from "./config";
 
 const TOKEN_KEY = "tinyurl.jwt";
-
-const apiBaseURL = import.meta.env.VITE_API_PREFIX ?? "";
 
 export const api = axios.create({
   baseURL: apiBaseURL,
