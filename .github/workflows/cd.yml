@@ -70,13 +70,13 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             # Remove stale old backup if previous deployment failed
-            rm -rf /var/www/tinyurl-frontend-old
+            sudo rm -rf /var/www/tinyurl-frontend-old
 
             # Move current live frontend to backup
-            mv /var/www/tinyurl-frontend /var/www/tinyurl-frontend-old
+            sudo mv /var/www/tinyurl-frontend /var/www/tinyurl-frontend-old
 
             # Promote newly uploaded frontend to live version
-            mv /var/www/tinyurl-frontend-new /var/www/tinyurl-frontend
+            sudo mv /var/www/tinyurl-frontend-new /var/www/tinyurl-frontend
 
             # Cleanup old frontend after successful swap
-            rm -rf /var/www/tinyurl-frontend-old
+            sudo rm -rf /var/www/tinyurl-frontend-old
