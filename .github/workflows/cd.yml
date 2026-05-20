@@ -1,14 +1,11 @@
 name: Deploy Frontend to EC2
-
 on:
   push:
     branches:
       - prod
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       # Checkout repository
       - name: Checkout code
@@ -25,8 +22,14 @@ jobs:
         run: npm ci
 
       # Build frontend
+      # Vite bakes env vars into the bundle at build time — must be passed here
+      # Without env: block, secrets are NOT automatically available to the build
       - name: Build frontend
         run: npm run build
+        env:
+          VITE_SOCKET_URL: ${{ secrets.VITE_SOCKET_URL }}
+          VITE_API_PREFIX: ${{ secrets.VITE_API_PREFIX }}
+          VITE_PUBLIC_ORIGIN: ${{ secrets.VITE_PUBLIC_ORIGIN }}
 
       # Upload dist files to EC2
       - name: Copy dist to EC2
