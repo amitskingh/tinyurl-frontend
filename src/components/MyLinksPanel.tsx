@@ -302,7 +302,7 @@ export function MyLinksPanel() {
               )}`;
               const shortUrl = apiPrefix.startsWith("http")
                 ? shortPath
-                : `${shortUrlBase}/api/v1/${encodeURIComponent(row.alias ?? "")}`;
+                : `${shortUrlBase}/s/${encodeURIComponent(row.alias ?? "")}`;
               const analytics = analyticsById[row.aliasId];
 
               return (
