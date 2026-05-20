@@ -188,6 +188,15 @@ export function MyLinksPanel() {
     }
   }, []);
 
+
+  useEffect(() => {
+    const run = async () => {
+      await loadList();
+    };
+
+    void run();
+  }, [loadList]);
+
   const loadAnalytics = useCallback(async (aliasId: number) => {
     setLoadingAnalytics(aliasId);
     try {
