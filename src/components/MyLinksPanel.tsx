@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useRealtimeAnalytics } from "../hooks/useRealtimeAnalytics";
-import { api, apiPrefix } from "../lib/api";
+import { api } from "../lib/api";
 import {
   isAnalyticsError,
   type AliasRow,
@@ -260,11 +260,8 @@ export function MyLinksPanel() {
 
   const origin =
     (typeof import.meta.env.VITE_PUBLIC_ORIGIN === "string" &&
-      import.meta.env.VITE_PUBLIC_ORIGIN) ||
-    window.location.origin;
-  const shortUrlBase = apiPrefix.startsWith("http")
-    ? apiPrefix
-    : `${origin}${apiPrefix}`;
+      import.meta.env.VITE_PUBLIC_ORIGIN);
+  const shortUrlBase = origin;
 
   return (
     <section className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm transition-colors duration-150 hover:border-gray-300">
@@ -306,12 +303,7 @@ export function MyLinksPanel() {
         {aliases && aliases.length > 0 ? (
           <ul className="flex flex-col gap-4">
             {aliases.map((row) => {
-              const shortPath = `${apiPrefix}/api/v1/${encodeURIComponent(
-                row.alias ?? ""
-              )}`;
-              const shortUrl = apiPrefix.startsWith("http")
-                ? shortPath
-                : `${shortUrlBase}/s/${encodeURIComponent(row.alias ?? "")}`;
+              const shortUrl = `${shortUrlBase}/s/${encodeURIComponent(row.alias ?? "")}`;
               const analytics = analyticsById[row.aliasId];
 
               return (

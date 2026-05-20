@@ -7,31 +7,39 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      # Checkout repository (triggers the workflow)
+      # Checkout repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # SSH into EC2, build on server and deploy directly
-      - name: Deploy to EC2 via SSH
-        uses: appleboy/ssh-action@v1.0.3
+      # Setup Node
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # Build frontend
+      # Vite bakes env vars into the bundle at build time — must be passed here
+      # Without env: block, secrets are NOT automatically available to the build
+      - name: Build frontend
+        run: npm run build
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_API_PREFIX: ${{ secrets.VITE_API_PREFIX }}
+          VITE_PUBLIC_ORIGIN: ${{ secrets.VITE_PUBLIC_ORIGIN }}
+
+      # Upload dist files to EC2
+      - name: Copy dist to EC2
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd /home/ubuntu/tinyurl-frontend
-
-            # Pull latest code from prod branch
-            git fetch origin
-            git checkout prod
-            git reset --hard origin/prod
-
-            # Install dependencies and build on EC2
-            # Vite reads .env.production automatically during build
-            npm ci
-            npm run build
-
-            # Replace live frontend with new build
-            # Keeps same directory inode — nginx volume mount stays valid
-            sudo rm -rf /var/www/tinyurl-frontend/*
-            sudo cp -r dist/* /var/www/tinyurl-frontend/
+          source: "dist/*"
+          target: "/var/www/tinyurl-frontend"
+          # Upload files directly without creating dist folder
+          # This becomes "/var/www/tinyurl-frontend/index.html" instead of "/var/www/tinyurl-frontend/dist/index.html"
+          strip_components: 1

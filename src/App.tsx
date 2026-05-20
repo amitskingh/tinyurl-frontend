@@ -10,7 +10,7 @@ import {
 import { AuthPanel } from "./components/AuthPanel";
 import { MyLinksPanel } from "./components/MyLinksPanel";
 import { useAuth } from "./context/AuthContext";
-import { api, apiPrefix } from "./lib/api";
+import { api } from "./lib/api";
 
 interface ApiSuccess {
   status: "success";
@@ -223,9 +223,8 @@ function Shortener() {
   const resolvedShortUrl = useMemo(() => {
     const shortCode = createdAlias?.alias.alias;
     if (!shortCode) return null;
-    const origin = import.meta.env.VITE_PUBLIC_ORIGIN ?? window.location.origin;
-    const base = apiPrefix.startsWith("http") ? apiPrefix : `${origin}${apiPrefix}`;
-    return `${base}/s/${encodeURIComponent(shortCode)}`;
+    const origin = import.meta.env.VITE_PUBLIC_ORIGIN;
+    return `${origin}/s/${encodeURIComponent(shortCode)}`;
   }, [createdAlias]);
 
   const submit = useCallback(async () => {
