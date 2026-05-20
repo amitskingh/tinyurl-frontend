@@ -46,6 +46,9 @@ jobs:
             sudo rm -rf /var/www/tinyurl-frontend-new
             sudo mkdir -p /var/www/tinyurl-frontend-new
 
+            # Allow ubuntu user used by SCP to write files
+            sudo chown ubuntu:ubuntu /var/www/tinyurl-frontend-new
+
       # Upload newly built frontend files
       # Existing live frontend stays untouched during upload
       # Gives near-zero downtime deployment
